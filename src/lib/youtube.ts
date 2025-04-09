@@ -5,7 +5,7 @@ export const useYouTubeChannel = (channelId: string) => {
 	const [videos, setVideos] = useState<YouTubeVideo[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [channelStats, setChannelStats] = useState<ChannelStats>(); // still here in case you add later
+	const [channelStats, setChannelStats] = useState<ChannelStats | null>(); // still here in case you add later
 
 	useEffect(() => {
 		const fetchVideos = async () => {
