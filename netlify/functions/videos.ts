@@ -10,7 +10,6 @@ dotenv.config();
 const YOUTUBE_API_KEY = process.env.VITE_YOUTUBE_API_KEY;
 const CACHE_TTL_MS = 1000 * 60 * 60; // 1 hour
 
-// --- Types ---
 interface YouTubeVideo {
 	id: string;
 	title: string;
@@ -25,20 +24,16 @@ interface CachedData {
 	videos: YouTubeVideo[];
 }
 
-// --- Zod Schemas ---
 const YouTubeSearchSchema = z.object({
+	nextPageToken: z.string().optional(),
 	items: z.array(
 		z.object({
-			id: z.object({
-				videoId: z.string(),
-			}),
+			id: z.object({ videoId: z.string() }),
 			snippet: z.object({
 				title: z.string(),
 				description: z.string(),
 				thumbnails: z.object({
-					high: z.object({
-						url: z.string(),
-					}),
+					high: z.object({ url: z.string() }),
 				}),
 			}),
 		})
@@ -57,30 +52,21 @@ const YouTubeStatsSchema = z.object({
 	),
 });
 
-// --- Helpers ---
 const getCachePath = (channelId: string) =>
 	path.resolve(`/tmp/videos-${channelId.trim().toLowerCase()}.json`);
 
 const isCacheFresh = async (cachePath: string): Promise<boolean> => {
-	if (!(await fs.pathExists(cachePath))) {
-		console.log("📁 Cache file not found:", cachePath);
-		return false;
-	}
-
+	if (!(await fs.pathExists(cachePath))) return false;
 	try {
 		const cached = await fs.readJson(cachePath) as CachedData;
-		const age = Date.now() - cached.timestamp;
-		console.log(`⏱ Cache age: ${age / 1000}s, TTL: ${CACHE_TTL_MS / 1000}s`);
-		return age < CACHE_TTL_MS;
-	} catch (err) {
-		console.error("⚠️ Failed to read cache file:", err);
+		return Date.now() - cached.timestamp < CACHE_TTL_MS;
+	} catch {
 		return false;
 	}
 };
 
 const readCache = async (cachePath: string): Promise<YouTubeVideo[]> => {
 	const cached = await fs.readJson(cachePath) as CachedData;
-	console.log("📥 Using cached data from:", cachePath);
 	return cached.videos;
 };
 
@@ -90,7 +76,6 @@ const writeCache = async (cachePath: string, videos: YouTubeVideo[]): Promise<vo
 		videos,
 	};
 	await fs.writeJson(cachePath, payload, { spaces: 2 });
-	console.log("💾 Cache written to:", cachePath);
 };
 
 const chunkArray = <T>(arr: T[], size: number): T[][] => {
@@ -101,30 +86,39 @@ const chunkArray = <T>(arr: T[], size: number): T[][] => {
 	return result;
 };
 
-// --- Main Fetch Function ---
 const fetchYouTubeData = async (channelId: string): Promise<YouTubeVideo[]> => {
-	if (!YOUTUBE_API_KEY) throw new Error("YouTube API key is missing");
-	const youtubeApiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&maxResults=500&order=date&type=video&key=${YOUTUBE_API_KEY}`
-	console.log('youtubeApiUrl', youtubeApiUrl	)
-	const videosRes = await fetch(
-		youtubeApiUrl
-	);
-	if (!videosRes.ok) {
-		const errorText = await videosRes.text();
-		console.error("❌ Failed to fetch YouTube videos:", videosRes.status, errorText);
-		throw new Error("YouTube video fetch failed");
-	  }
-	  
-	  const videosJson = await videosRes.json() as unknown;
-	  
-	  if (typeof videosJson !== "object" || videosJson === null || !("items" in videosJson)) {
-		console.error("❌ Invalid YouTube Search response:", JSON.stringify(videosJson, null, 2));
-		throw new Error("YouTube Search API returned an invalid structure");
-	  }
-	  
-	  const videosData = YouTubeSearchSchema.parse(videosJson);
+	if (!YOUTUBE_API_KEY) throw new Error("Missing YouTube API key");
 
-	const videoIds = videosData.items.map((item) => item.id.videoId);
+	let allItems: z.infer<typeof YouTubeSearchSchema>["items"] = [];
+	let nextPageToken: string | undefined = undefined;
+
+	do {
+		const url = new URL("https://www.googleapis.com/youtube/v3/search");
+		url.searchParams.set("part", "snippet");
+		url.searchParams.set("channelId", channelId);
+		url.searchParams.set("maxResults", "50");
+		url.searchParams.set("order", "date");
+		url.searchParams.set("type", "video");
+		url.searchParams.set("key", YOUTUBE_API_KEY);
+		if (nextPageToken) url.searchParams.set("pageToken", nextPageToken);
+
+		const res = await fetch(url.toString());
+		const json = (await res.json()) as unknown;
+		
+		const parsed = YouTubeSearchSchema.safeParse(json);
+		
+		if (!parsed.success) {
+			console.error("Validation error:", parsed.error);
+			throw new Error("Invalid API response format");
+		}
+		
+		allItems.push(...parsed.data.items);
+		nextPageToken = (json as any).nextPageToken; // You can safely access it here or better: parsed.data.nextPageToken if it's in schema
+
+		if (allItems.length >= 500) break;
+	} while (nextPageToken);
+
+	const videoIds = allItems.map((item) => item.id.videoId);
 	const videoIdChunks = chunkArray(videoIds, 50);
 
 	const statsItems = [];
@@ -139,11 +133,8 @@ const fetchYouTubeData = async (channelId: string): Promise<YouTubeVideo[]> => {
 
 	const statsMap = new Map(statsItems.map((item) => [item.id, item.statistics]));
 
-	return videosData.items.map((item) => {
-		const stats = statsMap.get(item.id.videoId) || {
-			viewCount: "0",
-			likeCount: "0",
-		};
+	return allItems.map((item) => {
+		const stats = statsMap.get(item.id.videoId) || { viewCount: "0", likeCount: "0" };
 		return {
 			id: item.id.videoId,
 			title: item.snippet.title,
@@ -155,7 +146,6 @@ const fetchYouTubeData = async (channelId: string): Promise<YouTubeVideo[]> => {
 	});
 };
 
-// --- Netlify Handler ---
 export const handler: Handler = async (event) => {
 	const channelId = event.queryStringParameters?.channelId;
 	if (!channelId) {
@@ -165,47 +155,38 @@ export const handler: Handler = async (event) => {
 		};
 	}
 
-	const normalizedChannelId = channelId.trim();
-	console.log("📺 Requested channel:", normalizedChannelId);
-	const cachePath = getCachePath(normalizedChannelId);
-
+	const cachePath = getCachePath(channelId);
 	try {
 		if (await isCacheFresh(cachePath)) {
-			const cachedVideos = await readCache(cachePath);
+			const cached = await readCache(cachePath);
 			return {
 				statusCode: 200,
-				body: JSON.stringify(cachedVideos),
+				body: JSON.stringify(cached),
 				headers: { "Content-Type": "application/json" },
 			};
 		}
 
-		const freshVideos = await fetchYouTubeData(normalizedChannelId);
-		await writeCache(cachePath, freshVideos);
+		const fresh = await fetchYouTubeData(channelId);
+		await writeCache(cachePath, fresh);
 
 		return {
 			statusCode: 200,
-			body: JSON.stringify(freshVideos),
+			body: JSON.stringify(fresh),
 			headers: { "Content-Type": "application/json" },
 		};
-	} catch (err: any) {
-		console.error("🔴 Error:", err);
-
+	} catch (err) {
+		console.error("Error:", err);
 		if (await fs.pathExists(cachePath)) {
-			try {
-				const fallback = await readCache(cachePath);
-				return {
-					statusCode: 200,
-					body: JSON.stringify(fallback),
-					headers: { "Content-Type": "application/json" },
-				};
-			} catch (e) {
-				console.error("🔴 Failed to read fallback cache:", e);
-			}
+			const fallback = await readCache(cachePath);
+			return {
+				statusCode: 200,
+				body: JSON.stringify(fallback),
+				headers: { "Content-Type": "application/json" },
+			};
 		}
-
 		return {
 			statusCode: 500,
-			body: JSON.stringify({ error: "Unable to fetch videos and no valid cache found." }),
+			body: JSON.stringify({ error: "Unable to fetch videos." }),
 		};
 	}
 };
