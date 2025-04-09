@@ -1,0 +1,35 @@
+{
+  "channelDescription": "A joyful collection of sing-along songs perfect for toddlers and preschoolers! These fun and educational tunes help little learners explore numbers, colors, animals, and more through music and movement.",
+  "videos": [
+    {
+      "id": "dQw4w9WgXcQ",
+      "title": "Learn Colors with Fun Songs",
+      "description": "Join us on a colorful adventure as we sing and learn about different colors! Perfect for toddlers and preschoolers.",
+      "thumbnail": "https://images.unsplash.com/photo-1550029402-226115b7c579?w=500&q=80"
+    },
+    {
+      "id": "ABC123xyz",
+      "title": "Counting Numbers 1-10",
+      "description": "Let's count together with this catchy tune perfect for little mathematicians! Interactive and fun learning.",
+      "thumbnail": "https://images.unsplash.com/photo-1509869175650-a1d97972541a?w=500&q=80"
+    },
+    {
+      "id": "DEF456uvw",
+      "title": "Animal Friends Song",
+      "description": "Meet our animal friends and learn the sounds they make! A delightful musical journey through the animal kingdom.",
+      "thumbnail": "https://images.unsplash.com/photo-1535930891776-0c2dfb7fda1a?w=500&q=80"
+    },
+    {
+      "id": "GHI789rst",
+      "title": "ABC's Musical Adventure",
+      "description": "Sing along with our alphabet friends! A melodic way to learn letters and phonics.",
+      "thumbnail": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=500&q=80"
+    },
+    {
+      "id": "JKL012mno",
+      "title": "Shapes and Patterns Dance",
+      "description": "Dance and learn about different shapes and patterns! Get moving with this interactive learning song.",
+      "thumbnail": "https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=500&q=80"
+    }
+  ]
+}
