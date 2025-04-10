@@ -55,109 +55,124 @@ function App() {
 							LittleLullabies
 						</span>
 					</div>
-					<div className="flex items-center gap-4">
+					<div className="flex items-center gap-3 sm:gap-4">
 						<a
 							href="https://instagram.com/littlelullabies"
 							target="_blank"
 							rel="noopener noreferrer"
-							className="text-gray-600 hover:text-pink-500 transition-colors"
+							className="text-pink-500 hover:text-pink-600 transition-colors"
 						>
-							<Instagram className="h-6 w-6" />
+							<Instagram className="h-6 w-6 drop-shadow-sm" />
 						</a>
 						<a
 							href="https://facebook.com/littlelullabies"
 							target="_blank"
 							rel="noopener noreferrer"
-							className="text-gray-600 hover:text-blue-600 transition-colors"
+							className="text-[#1877F2] hover:text-[#145dbf] transition-colors"
 						>
-							<Facebook className="h-6 w-6" />
+							<Facebook className="h-6 w-6 drop-shadow-sm" />
 						</a>
 					</div>
+
 				</div>
 			</div>
 
 			{/* Hero Section */}
-			<header className="relative py-10 px-6 text-center bg-gradient-to-r from-purple-200 via-pink-200 to-red-200">
+			<header className="relative py-6 sm:py-10 px-4 sm:px-6 text-center bg-gradient-to-r from-purple-200 via-pink-200 to-red-200">
 				<div className="absolute inset-0 bg-white/40 backdrop-blur-lg rounded-lg shadow-md"></div>
-				<div className="relative flex items-center justify-between">
-					{/* Left Side Image with Animation */}
+				<div className="relative flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
+
+					{/* Left Image */}
 					<motion.div
 						animate={{ opacity: [0, 1] }}
 						transition={{ duration: 1 }}
-						className="w-32 md:w-48"
+						className="w-20 sm:w-32 md:w-48"
 					>
 						<img src="/guitar-teddy.png" alt="Left Image" className="w-full h-auto" />
 					</motion.div>
 
-					{/* Center Content */}
-					<div className="flex flex-col items-center justify-center gap-4 mb-5 animate-fade-in">
-						<div className="flex items-center space-x-4">
-							<div className="bg-white p-3 rounded-full shadow-lg transition-transform hover:scale-110">
-								<Music className="h-10 w-10 text-purple-500" />
+					{/* Center Title and Content */}
+					<div className="flex flex-col items-center justify-center gap-3 sm:gap-4 mb-4 sm:mb-5 animate-fade-in">
+						{/* Logo + Title */}
+						<div className="flex items-center space-x-3 sm:space-x-4">
+							<div className="bg-white p-2 sm:p-3 rounded-full shadow-lg transition-transform hover:scale-110">
+								<Music className="h-7 w-7 sm:h-10 sm:w-10 text-purple-500" />
 							</div>
-							<h1 className="text-6xl font-extrabold bg-gradient-to-r from-pink-500 via-purple-500 to-red-500 text-transparent bg-clip-text drop-shadow-md">
+							<h1 className="text-4xl sm:text-6xl font-extrabold bg-gradient-to-r from-pink-500 via-purple-500 to-red-500 text-transparent bg-clip-text drop-shadow-md">
 								LittleLullabies
 							</h1>
 						</div>
 
-						{/* Stars under Title */}
-						<div className="flex justify-center gap-2 mb-6">
+						{/* Stars */}
+						<div className="flex justify-center gap-1 sm:gap-2 mb-4">
 							{[1, 2, 3, 4, 5].map((star) => (
 								<Star
 									key={star}
-									className="h-7 w-7 text-yellow-400 fill-yellow-400 drop-shadow-md animate-bounce"
+									className="h-5 w-5 sm:h-7 sm:w-7 text-yellow-400 fill-yellow-400 drop-shadow-md animate-bounce"
 								/>
 							))}
 						</div>
 
 						{/* Channel Stats */}
 						{channelStats && (
-							<div className="flex justify-center gap-10 my-6 text-gray-800">
-								<div className="flex items-center gap-2">
-									<Users className="h-6 w-6 text-purple-500" />
-									<span className="font-semibold text-lg">
-										{formatNumber(channelStats.subscriberCount)} subscribers
-									</span>
-								</div>
-								<Separator orientation="vertical" className="h-6 bg-gray-400" />
-								<div className="flex items-center gap-2">
-									<Youtube className="h-6 w-6 text-red-500" />
-									<span className="font-semibold text-lg">
-										{formatNumber(channelStats.videoCount)} videos
-									</span>
-								</div>
-								<Separator orientation="vertical" className="h-6 bg-gray-400" />
-								<div className="flex items-center gap-2">
-									<Eye className="h-6 w-6 text-blue-500" />
-									<span className="font-semibold text-lg">
-										{formatNumber(channelStats.viewCount)} views
-									</span>
+							<div className="w-full max-w-3xl mx-auto px-4 py-4 bg-white/70 rounded-xl shadow-md backdrop-blur-md mt-6 sm:mt-10">
+								<div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-10 text-gray-800 text-center">
+
+									{/* Subscribers */}
+									<div className="flex items-center gap-2">
+										<Users className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
+										<span className="font-semibold text-base sm:text-lg">
+											{formatNumber(channelStats.subscriberCount)} subscribers
+										</span>
+									</div>
+
+									{/* Separator (only on larger screens) */}
+									<div className="hidden sm:block">
+										<Separator orientation="vertical" className="h-6 bg-gray-400" />
+									</div>
+
+									{/* Videos */}
+									<div className="flex items-center gap-2">
+										<Youtube className="h-5 w-5 sm:h-6 sm:w-6 text-red-500" />
+										<span className="font-semibold text-base sm:text-lg">
+											{formatNumber(channelStats.videoCount)} videos
+										</span>
+									</div>
+
+									{/* Separator (only on larger screens) */}
+									<div className="hidden sm:block">
+										<Separator orientation="vertical" className="h-6 bg-gray-400" />
+									</div>
+
+									{/* Views */}
+									<div className="flex items-center gap-2">
+										<Eye className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
+										<span className="font-semibold text-base sm:text-lg">
+											{formatNumber(channelStats.viewCount)} views
+										</span>
+									</div>
 								</div>
 							</div>
 						)}
 
-						{/* Description Section */}
-						<div className="relative z-10 mt-2">
-							<p className="max-w-3xl mx-auto font-[Caveat] text-2xl text-pink-600 transform hover:scale-105 transition-all">
-								{CHANNEL_DESCRIPTION}
-							</p>
-						</div>
+
+						{/* Description */}
+						<p className="max-w-md sm:max-w-3xl mx-auto font-[Caveat] text-lg sm:text-2xl text-pink-600 transform hover:scale-105 transition-all px-2">
+							{CHANNEL_DESCRIPTION}
+						</p>
 					</div>
 
-					{/* Right Side Image with Animation */}
+					{/* Right Image */}
 					<motion.div
 						animate={{ x: [50, 0], opacity: [0, 1] }}
 						transition={{ duration: 1.5, type: 'spring', stiffness: 100 }}
-						className="w-32 md:w-48"
+						className="hidden sm:block w-32 md:w-48"
 					>
 						<img src="/dancing-teddy.png" alt="Right Image" className="w-full h-auto" />
 					</motion.div>
 				</div>
-
-
-
-
 			</header>
+
 
 
 			{/* Main Content */}
