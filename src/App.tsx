@@ -57,7 +57,7 @@ function App() {
 					</div>
 					<div className="flex items-center gap-3 sm:gap-4">
 						<a
-							href="https://instagram.com/littlelullabies"
+							href="https://www.instagram.com/littlelullabiestunes"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="text-pink-500 hover:text-pink-600 transition-colors"
@@ -65,7 +65,7 @@ function App() {
 							<Instagram className="h-6 w-6 drop-shadow-sm" />
 						</a>
 						<a
-							href="https://facebook.com/littlelullabies"
+							href="https://www.facebook.com/share/18X7H4zAha/?mibextid=wwXIfr"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="text-[#1877F2] hover:text-[#145dbf] transition-colors"
