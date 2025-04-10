@@ -7,6 +7,7 @@ export const VideoSchema = z.object({
 	thumbnail: z.string(),
 	viewCount: z.string(),
 	likeCount: z.string(),
+	publishedAt: z.string()
 });
 
 

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
 	Card,
 	CardDescription,
@@ -18,8 +19,8 @@ import {
 import { useYouTubeChannel } from "./lib/youtube";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { motion } from 'framer-motion';
-import './App.css'
+import { motion } from "framer-motion";
+import "./App.css";
 
 const CHANNEL_DESCRIPTION =
 	"A joyful collection of sing-along songs perfect for toddlers and preschoolers! These fun and educational tunes help little learners explore numbers, colors, animals, and more through music and movement.";
@@ -39,6 +40,24 @@ function App() {
 	const openYouTubeVideo = (videoId: string) => {
 		window.open(`https://youtube.com/watch?v=${videoId}`, "_blank");
 	};
+
+	var isBeforeToday = (dateString: string): boolean => {
+		const today = new Date();
+		const videoDate = new Date(dateString);
+	  
+		// Reset the time of both today and the video date to ensure we're only comparing the date part
+		today.setHours(0, 0, 0, 0);
+		videoDate.setHours(0, 0, 0, 0);
+	  
+		return videoDate >= today;
+	  }
+	  
+
+	  const FlashingTag: React.FC = () => (
+		<div className="absolute top-2 left-2 bg-red-500 text-white px-3 py-1 rounded-full text-sm animate-flashing z-10">
+		  New
+		</div>
+	  );
 
 	return (
 		<div className="min-h-screen bg-gradient-to-b from-[#ffafcc] via-[#b388eb] to-[#ff8fab]">
@@ -73,7 +92,6 @@ function App() {
 							<Facebook className="h-6 w-6 drop-shadow-sm" />
 						</a>
 					</div>
-
 				</div>
 			</div>
 
@@ -81,7 +99,6 @@ function App() {
 			<header className="relative py-6 sm:py-10 px-4 sm:px-6 text-center bg-gradient-to-r from-purple-200 via-pink-200 to-red-200">
 				<div className="absolute inset-0 bg-white/40 backdrop-blur-lg rounded-lg shadow-md"></div>
 				<div className="relative flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
-
 					{/* Left Image */}
 					<motion.div
 						animate={{ opacity: [0, 1] }}
@@ -117,7 +134,6 @@ function App() {
 						{channelStats && (
 							<div className="w-full max-w-3xl mx-auto px-4 py-4 bg-white/70 rounded-xl shadow-md backdrop-blur-md mt-6 sm:mt-10">
 								<div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-10 text-gray-800 text-center">
-
 									{/* Subscribers */}
 									<div className="flex items-center gap-2">
 										<Users className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
@@ -155,7 +171,6 @@ function App() {
 							</div>
 						)}
 
-
 						{/* Description */}
 						<p className="max-w-md sm:max-w-3xl mx-auto font-[Caveat] text-lg sm:text-2xl text-pink-600 transform hover:scale-105 transition-all px-2">
 							{CHANNEL_DESCRIPTION}
@@ -165,15 +180,13 @@ function App() {
 					{/* Right Image */}
 					<motion.div
 						animate={{ x: [50, 0], opacity: [0, 1] }}
-						transition={{ duration: 1.5, type: 'spring', stiffness: 100 }}
+						transition={{ duration: 1.5, type: "spring", stiffness: 100 }}
 						className="hidden sm:block w-32 md:w-48"
 					>
 						<img src="/dancing-teddy.png" alt="Right Image" className="w-full h-auto" />
 					</motion.div>
 				</div>
 			</header>
-
-
 
 			{/* Main Content */}
 			<main className="container mx-auto px-6 py-16">
@@ -198,6 +211,8 @@ function App() {
 							className="overflow-hidden hover:shadow-2xl transition-transform duration-300 cursor-pointer transform hover:-translate-y-2 rounded-2xl border border-gray-200 bg-white"
 							onClick={() => openYouTubeVideo(video.id)}
 						>
+							{isBeforeToday(video.publishedAt) && <FlashingTag />} {/* Flashing tag for new videos */}
+
 							<div className="aspect-video relative group">
 								<img
 									src={video.thumbnail}

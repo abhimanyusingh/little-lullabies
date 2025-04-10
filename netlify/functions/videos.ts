@@ -17,6 +17,7 @@ interface YouTubeVideo {
 	thumbnail: string;
 	viewCount: string;
 	likeCount: string;
+	publishedAt:string
 }
 
 interface CachedData {
@@ -35,6 +36,7 @@ const YouTubeSearchSchema = z.object({
 				thumbnails: z.object({
 					high: z.object({ url: z.string() }),
 				}),
+				publishedAt: z.string(), // Added to schema
 			}),
 		})
 	),
@@ -92,6 +94,13 @@ const fetchYouTubeData = async (channelId: string): Promise<YouTubeVideo[]> => {
 	let allItems: z.infer<typeof YouTubeSearchSchema>["items"] = [];
 	let nextPageToken: string | undefined = undefined;
 
+	// Set the start and end of today in UTC
+	const todayStart = new Date();
+	todayStart.setUTCHours(0, 0, 0, 0); // Start of today in UTC
+
+	const todayEnd = new Date();
+	todayEnd.setUTCHours(23, 59, 59, 999); // End of today in UTC
+
 	do {
 		const url = new URL("https://www.googleapis.com/youtube/v3/search");
 		url.searchParams.set("part", "snippet");
@@ -113,7 +122,7 @@ const fetchYouTubeData = async (channelId: string): Promise<YouTubeVideo[]> => {
 		}
 		
 		allItems.push(...parsed.data.items);
-		nextPageToken = (json as any).nextPageToken; // You can safely access it here or better: parsed.data.nextPageToken if it's in schema
+		nextPageToken = (json as any).nextPageToken;
 
 		if (allItems.length >= 500) break;
 	} while (nextPageToken);
@@ -133,17 +142,20 @@ const fetchYouTubeData = async (channelId: string): Promise<YouTubeVideo[]> => {
 
 	const statsMap = new Map(statsItems.map((item) => [item.id, item.statistics]));
 
-	return allItems.map((item) => {
-		const stats = statsMap.get(item.id.videoId) || { viewCount: "0", likeCount: "0" };
-		return {
-			id: item.id.videoId,
-			title: item.snippet.title,
-			description: item.snippet.description,
-			thumbnail: item.snippet.thumbnails.high.url,
-			viewCount: stats.viewCount,
-			likeCount: stats.likeCount ?? "0",
-		};
-	});
+	// Filter only videos uploaded today
+	return allItems
+		.map((item) => {
+			const stats = statsMap.get(item.id.videoId) || { viewCount: "0", likeCount: "0" };
+			return {
+				id: item.id.videoId,
+				title: item.snippet.title,
+				description: item.snippet.description,
+				thumbnail: item.snippet.thumbnails.high.url,
+				viewCount: stats.viewCount,
+				likeCount: stats.likeCount ?? "0",
+				publishedAt: item.snippet.publishedAt
+			};
+		});
 };
 
 export const handler: Handler = async (event) => {

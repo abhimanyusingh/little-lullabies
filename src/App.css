@@ -1,2 +1,22 @@
 /* Add this to your global CSS or styled-components */
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Pacifico&display=swap');
+
+
+@keyframes flashing {
+  0% {
+    opacity: 1;
+    background-color: #e11d48; /* A darker red */
+  }
+  50% {
+    opacity: 0.8;
+    background-color: #f5089a; /* A lighter red */
+  }
+  100% {
+    opacity: 1;
+    background-color: #e11d48; /* A darker red */
+  }
+}
+
+.animate-flashing {
+  animation: flashing 1s infinite;
+}
