@@ -138,7 +138,7 @@ function App() {
 
 						{/* Description Section */}
 						<div className="relative z-10 mt-2">
-							<p className="text-gray-700 max-w-3xl mx-auto text-lg font-[Caveat] text-4xl text-pink-600 transform hover:scale-105 transition-all">
+							<p className="max-w-3xl mx-auto font-[Caveat] text-2xl text-pink-600 transform hover:scale-105 transition-all">
 								{CHANNEL_DESCRIPTION}
 							</p>
 						</div>
